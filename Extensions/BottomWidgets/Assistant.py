@@ -1,39 +1,68 @@
 import os
-import ast
+import re
+import tempfile
+import subprocess
+from collections import namedtuple
+
 from PyQt4 import QtCore, QtGui
-from pyflakes.checker import Checker as flakeChecker
+
 from Xtra import pep8
 from Xtra import autopep8
 
 
-class ErrorCheckerThread(QtCore.QThread):
+FLAKE8_RE = re.compile(
+    r'^[^:]+:(?P<lineno>\d+):(?:(?P<col>\d+):)?\s*(?P<msg>.*?)\s*$'
+)
+ERROR_RE = re.compile(r'^E\d+\s')
 
+LinterWarning = namedtuple('LinterWarning', 'lineno offset message')
+LinterError = namedtuple('LinterError', 'lineno offset message')
+
+
+def run_flake8(source):
+    """Run flake8 over the given Python source.
+
+    Returns a list of LinterWarning/LinterError.
+
+    """
+    messages = []
+    with tempfile.NamedTemporaryFile('w', encoding='utf8') as f:
+        f.write(source)
+        f.flush()
+        try:
+            output = subprocess.check_output(['flake8', f.name])
+        except subprocess.CalledProcessError as e:
+            output = e.output
+    for l in output.decode('utf8').splitlines():
+        mo = FLAKE8_RE.match(l)
+        if mo:
+            lineno = int(mo.group('lineno'))
+            if mo.group('col') is not None:
+                col = int(mo.group('col'))
+            else:
+                col = None
+            msg = mo.group('msg')
+            cls = LinterError if ERROR_RE.match(msg) else LinterWarning
+            messages.append(
+                cls(lineno=lineno, offset=col, message=msg)
+            )
+    return messages
+
+
+class ErrorCheckerThread(QtCore.QThread):
     newAlerts = QtCore.pyqtSignal(list, bool)
 
     def run(self):
         messages = []
         try:
-            warnings = flakeChecker(ast.parse(self.source))
-            warnings.messages.sort(key=lambda a: a.lineno)
-            for warning in warnings.messages:
-                fname = warning.filename
-                lineno = warning.lineno
-                message = warning.message
-                args = warning.message_args
-                messages.append((lineno, message % (args), args))
-            self.newAlerts.emit(messages, False)
-        except Exception as err:
-            error_text = err.args[1][3]
-            msg = err.msg.capitalize() + '.'
-            line = err.lineno
-            offset = err.args[1][2]
-
-            messages.append((1, line, msg, None, offset))
-            self.newAlerts.emit(messages, True)
+            messages = run_flake8(self.source)
+        except Exception:
+            import traceback
+            traceback.print_exc()
+        self.newAlerts.emit(messages, False)
 
     def runCheck(self, source):
         self.source = source
-
         self.start()
 
 
@@ -136,7 +165,7 @@ class Pep8View(QtGui.QTreeWidget):
 
     def autoPep8Done(self, fixedCode):
         self.editorTabWidget.busyWidget.showBusy(False)
-        
+
         editor = self.editorTabWidget.getEditor()
         editor.setText(fixedCode)
         self.editorTabWidget.getEditor().removeBookmarks()
@@ -314,9 +343,29 @@ class Assistant(QtGui.QStackedWidget):
                                 editor.annotationErrorStyle)
                 self.bottomStackSwitcher.setCurrentWidget(self)
             else:
-                for i in alertsList:
-                    item = self.createItem(0, i[0], i[1], i[2])
+                for a in alertsList:
+                    item = self.createItem(a)
                     self.errorView.addTopLevelItem(item)
+                    lineno = a.lineno - 1
+                    editor.markerAdd(lineno, 9)
+                    line = editor.text(lineno)
+                    if a.offset is None:
+                        startpos = 0
+                        endpos = len(line)
+                    else:
+                        startpos = a.offset - 1
+                        mo = re.match(r'\w+|\s+|[<=>]=|\*\*|\W', line[startpos:])
+                        if mo:
+                            endpos = startpos + mo.end()
+                        else:
+                            endpos = len(line)
+                    if startpos == endpos:
+                        startpos = 0
+                    editor.fillIndicatorRange(
+                        lineno, startpos,
+                        lineno, endpos,
+                        editor.syntaxErrorIndicator
+                    )
                 self.editorTabWidget.updateEditorData("errorLine", None)
             self.bottomStackSwitcher.setCount(self, str(len(alertsList)))
             if len(alertsList) == 0:
@@ -328,19 +377,17 @@ class Assistant(QtGui.QStackedWidget):
                 self.errorView.addTopLevelItem(parentItem)
                 parentItem.setExpanded(True)
 
-    def createItem(self, itemType, line, message, args=None, offset=None):
-        item = QtGui.QTreeWidgetItem(itemType)
-        if itemType == 0:
+    def createItem(self, alert):
+        item = QtGui.QTreeWidgetItem()
+        if isinstance(alert, LinterWarning):
             item.setIcon(0, QtGui.QIcon(
                 os.path.join("Resources", "images", "alerts", "_0035_Flashlight")))
-        elif itemType == 1:
+        else:
             item.setIcon(0, QtGui.QIcon(
                 os.path.join("Resources", "images", "alerts", "construction")))
-        item.setText(1, str(line))
-        item.setText(2, message)
-        item.setData(10, 2, offset)
-        item.setData(10, 3, args)
-
+        item.setText(1, str(alert.lineno))
+        item.setText(2, alert.message)
+        item.setData(10, 2, alert.offset)
         return item
 
     def updatePep8View(self, checkList):
