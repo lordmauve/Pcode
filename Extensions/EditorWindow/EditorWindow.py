@@ -238,10 +238,6 @@ class EditorWindow(QtGui.QWidget):
         #*** encoding
         self.encodingLabel = QtGui.QLabel("Coding: utf-8")
         self.statusbar.addPermanentWidget(self.encodingLabel)
-        #*** uptime
-        self.uptimeLabel = QtGui.QLabel()
-        self.uptimeLabel.setText("Uptime: 0min")
-        self.statusbar.addPermanentWidget(self.uptimeLabel)
 
         self.runWidget = RunWidget(
             self.bottomStackSwitcher, self.projectData[
@@ -286,12 +282,6 @@ class EditorWindow(QtGui.QWidget):
         hbox.addStretch(1)
         hbox.addWidget(self.statusbar)
         mainLayout.addLayout(hbox)
-
-        self.uptime = 0
-        self.uptimeTimer = QtCore.QTimer()
-        self.uptimeTimer.setInterval(60000)
-        self.uptimeTimer.timeout.connect(self.updateUptime)
-        self.uptimeTimer.start()
 
         # remember layout
         if projectPathDict['root'] in self.useData.OPENED_PROJECTS:
@@ -580,19 +570,6 @@ class EditorWindow(QtGui.QWidget):
     def openFeedbackLink(self):
         QtGui.QDesktopServices().openUrl(QtCore.QUrl(
             """https://twitter.com/PcodeIDE"""))
-
-    def updateUptime(self):
-        self.uptime += 1
-        if self.uptime == 60:
-            new_time = "1hr"
-        elif self.uptime > 60:
-            t = int(str(self.uptime / 60).split('.')[0])
-            h = str(t) + "hr"
-            m = str(self.uptime - (t * 60)) + "min"
-            new_time = h + m
-        else:
-            new_time = str(self.uptime) + "min"
-        self.uptimeLabel.setText("Uptime: " + new_time)
 
     def saveAll(self):
         self.editorTabWidget.saveAll()
