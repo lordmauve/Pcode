@@ -414,11 +414,11 @@ class RunWidget(BaseScintilla):
     def writeExitStatus(self, exitCode, exitStatus):
         self.writeOutput()
         self.writeError()
-        if exitStatus == QtCore.QProcess.NormalExit:
-            self.printout(">>> Exit: {0}\n".format(str(exitCode)), 3)
-        else:
-            # error will be displayed instead by writeProcessError
-            pass
+#        if exitStatus == QtCore.QProcess.NormalExit:
+#            self.printout(">>> Exit: {0}\n".format(str(exitCode)), 3)
+#        else:
+#            # error will be displayed instead by writeProcessError
+#            pass
         self.currentProcess = None
         if exitCode == 1:
             self.vSplitter.showError()
@@ -481,12 +481,12 @@ class RunWidget(BaseScintilla):
         if run_internal:
             self.currentProcess = fileName
             if run_with_args:
-                self.printout(">>> Running: {0} <arguments={1}>\n".format(
+                self.printout("\n*** Running: {0} <arguments={1}>\n".format(
                     self.currentProcess, args), 4)
                 self.runProcess.start(pythonPath, [
                                       runScript, args], self.openMode)
             else:
-                self.printout(">>> Running: {0} <arguments=None>\n".format(
+                self.printout("\n*** Running: {0}\n".format(
                     self.currentProcess), 4)
                 self.runProcess.start(pythonPath, [runScript], self.openMode)
             self.runProcess.waitForStarted()

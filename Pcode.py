@@ -37,15 +37,15 @@ class Pcode(QtGui.QWidget):
 
         self.useData = UseData()
 
-        logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', 
+        logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                             filename=self.useData.appPathDict["logfile"], level=logging.DEBUG)
         if sys.version_info.major < 3:
             logging.error("This application requires Python 3")
             sys.exit(1)
-        
+
         self.library = Library(self.useData)
         self.busyWidget = BusyWidget(app, self.useData, self)
-        
+
         if self.useData.SETTINGS["UI"] == "Custom":
             app.setStyleSheet(StyleSheet.globalStyle)
 
@@ -85,12 +85,13 @@ class Pcode(QtGui.QWidget):
         self.projectSwitcher.setStyleSheet(StyleSheet.mainMenuStyle)
         hbox.addWidget(self.projectSwitcher)
 
-        self.addPage(self.projectWindowStack, "EDITOR", QtGui.QIcon(
-            os.path.join("Resources", "images", "hire-me")))
-
-        self.addPage(self.library, "LIBRARY", QtGui.QIcon(
-            os.path.join("Resources", "images", "library")))
-        self.projectSwitcher.setDefault()
+        self.pagesStack.addWidget(self.projectWindowStack)
+#        self.addPage(self.projectWindowStack, "EDITOR", QtGui.QIcon(
+#            os.path.join("Resources", "images", "hire-me")))
+#
+#        self.addPage(self.library, "LIBRARY", QtGui.QIcon(
+#            os.path.join("Resources", "images", "library")))
+#        self.projectSwitcher.setDefault()
 
         hbox.addWidget(self.projectTitleBox)
         hbox.setSpacing(5)

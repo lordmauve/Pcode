@@ -76,7 +76,7 @@ globalStyle = """
              }
 
              QComboBox:on { /* shift the text when the popup opens */
-             
+
              }
 
              QComboBox::drop-down {
@@ -138,11 +138,10 @@ globalStyle = """
         QTabBar::tab {
              background: none;
              border: none;
-             min-width: 24ex;
-             min-height: 5ex;
+             min-height: 4ex;
              padding: 2px;
-             padding-left: 5px;
-             padding-right: 5px;
+             padding-left: 15px;
+             padding-right: 15px;
         }
 
         QTabBar::tab:hover {
@@ -167,9 +166,9 @@ globalStyle = """
              border-left: none;
         }
 
-        QTabBar::tear {
-             image: url(Resources/style/images/tear.png);
-        }
+        /*QTabBar::tear {
+             image: url(Resources/style/images/Arrow Left.png);
+        }*/
 
         QTabBar::scroller { /* the width of the scroll buttons */
              width: 20px;
@@ -464,7 +463,7 @@ globalStyle = """
             background: none;
             border: none;
         }
-        
+
         QScrollBar::add-line:vertical:pressed,
         QScrollBar::sub-line:vertical:pressed,
         QScrollBar::add-page:vertical:pressed,
