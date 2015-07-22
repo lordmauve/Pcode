@@ -246,7 +246,7 @@ class Assistant(QtGui.QStackedWidget):
 
         self.errorView = QtGui.QTreeWidget()
         self.errorView.setColumnCount(3)
-        self.errorView.setHeaderLabels(["", "#", "Alerts"])
+        self.errorView.setHeaderLabels(["", "Line", "Message"])
         self.errorView.setAutoScroll(True)
         self.errorView.setColumnWidth(0, 50)
         self.errorView.setColumnWidth(1, 50)
@@ -341,13 +341,14 @@ class Assistant(QtGui.QStackedWidget):
                                           offset, editor.syntaxErrorIndicator)
                 editor.annotate(lineno, msg.capitalize(),
                                 editor.annotationErrorStyle)
-                self.bottomStackSwitcher.setCurrentWidget(self)
+
             else:
                 for a in alertsList:
                     item = self.createItem(a)
                     self.errorView.addTopLevelItem(item)
                     lineno = a.lineno - 1
-                    editor.markerAdd(lineno, 9)
+                    # No need for a marker - it's just noisy
+                    # editor.markerAdd(lineno, 9)
                     line = editor.text(lineno)
                     if a.offset is None:
                         startpos = 0
@@ -366,16 +367,22 @@ class Assistant(QtGui.QStackedWidget):
                         lineno, endpos,
                         editor.syntaxErrorIndicator
                     )
-                self.editorTabWidget.updateEditorData("errorLine", None)
+#                    editor.annotate(lineno, a.message,
+#                                    editor.annotationErrorStyle)
+#           self.editorTabWidget.updateEditorData("errorLine", None)
             self.bottomStackSwitcher.setCount(self, str(len(alertsList)))
-            if len(alertsList) == 0:
+            if not alertsList:
                 parentItem = QtGui.QTreeWidgetItem()
                 item = QtGui.QTreeWidgetItem()
-                item.setText(2, "<No Alerts>")
+                item.setText(2, "No code problems detected.")
                 item.setFlags(QtCore.Qt.NoItemFlags)
                 parentItem.addChild(item)
                 self.errorView.addTopLevelItem(parentItem)
                 parentItem.setExpanded(True)
+
+    def focusAlerts(self):
+        """Show the alerts page in the bottom info panes."""
+        self.bottomStackSwitcher.setCurrentWidget(self)
 
     def createItem(self, alert):
         item = QtGui.QTreeWidgetItem()
