@@ -74,6 +74,9 @@ class EditorWindow(QtGui.QWidget):
         self.bottomStack = QtGui.QStackedWidget()
         self.vSplitter.addWidget(self.bottomStack)
 
+        self.navigator = QtGui.QTabWidget()
+        self.navigator.setObjectName("navigator")
+        self.hSplitter.addWidget(self.navigator)
         self.hSplitter.addWidget(widget)
 
         self.bottomStackSwitcher = StackSwitcher(self.bottomStack)
@@ -137,25 +140,28 @@ class EditorWindow(QtGui.QWidget):
         self.outline = Outline(
             self.useData, self.editorTabWidget)
 
-        self.sideSplitter = QtGui.QSplitter()
-        self.sideSplitter.setObjectName("sidebarItem")
-        self.sideSplitter.setOrientation(0)
-        self.hSplitter.addWidget(self.sideSplitter)
+        self.navigator.addTab(self.outline, "Outline")
+        self.navigator.addTab(self.projectManager.projectView, "Project")
 
-        self.sideSplitter.addWidget(self.outline)
+#        self.sideSplitter = QtGui.QSplitter()
+#        self.sideSplitter.setObjectName("sidebarItem")
+#        self.sideSplitter.setOrientation(0)
+#
+#        self.sideSplitter.addWidget(self.outline)
 
-        self.sideBottomTab = QtGui.QTabWidget()
-        self.sideBottomTab.setObjectName("sideBottomTab")
-        self.sideSplitter.addWidget(self.sideBottomTab)
+#        self.sideBottomTab = QtGui.QTabWidget()
+#        self.sideBottomTab.setObjectName("sideBottomTab")
+#        self.sideSplitter.addWidget(self.sideBottomTab)
 
-        self.sideBottomTab.addTab(self.projectManager.projectView, QtGui.QIcon(
-            os.path.join("Resources", "images", "tree")), "Project")
+#        self.sideBottomTab.addTab(self.projectManager.projectView, QtGui.QIcon(
+#            os.path.join("Resources", "images", "tree")), "Project")
+#        self.sideSplitter.addWidget(self.projectManager.projectView)
 
-        self.fileExplorer = FileExplorer(
-            self.useData, self.projectData['shortcuts'], self.messagesWidget, self.editorTabWidget)
-        self.fileExplorer.fileActivated.connect(self.editorTabWidget.loadfile)
-        self.sideBottomTab.addTab(self.fileExplorer, QtGui.QIcon(
-            os.path.join("Resources", "images", "tree")), "File System")
+#        self.fileExplorer = FileExplorer(
+#            self.useData, self.projectData['shortcuts'], self.messagesWidget, self.editorTabWidget)
+#        self.fileExplorer.fileActivated.connect(self.editorTabWidget.loadfile)
+#        self.sideBottomTab.addTab(self.fileExplorer, QtGui.QIcon(
+#            os.path.join("Resources", "images", "tree")), "File System")
 
         # create menus
         self.mainMenu = QtGui.QMenu()
@@ -166,6 +172,22 @@ class EditorWindow(QtGui.QWidget):
         self.mainMenu.addAction(self.editorTabWidget.saveAsAct)
         self.mainMenu.addAction(self.editorTabWidget.saveCopyAsAct)
         self.mainMenu.addAction(self.editorTabWidget.printAct)
+
+        editMenu = self.mainMenu.addMenu('Edit')
+
+        editMenu.addAction(self.editorTabWidget.undoAct)
+        self.editorTabWidget.undoAct.setDisabled(True)
+        editMenu.addAction(self.editorTabWidget.redoAct)
+        self.editorTabWidget.redoAct.setDisabled(True)
+        editMenu.addSeparator()
+        editMenu.addAction(self.editorTabWidget.cutAct)
+        self.editorTabWidget.cutAct.setDisabled(True)
+        editMenu.addAction(self.editorTabWidget.copyAct)
+        self.editorTabWidget.copyAct.setDisabled(True)
+        editMenu.addAction(self.editorTabWidget.pasteAct)
+        editMenu.addSeparator()
+        editMenu.addAction(self.editorTabWidget.dedentAct)
+        editMenu.addAction(self.editorTabWidget.indentAct)
 
         self.projectMenu = QtGui.QMenu("Project")
         if projectPathDict["type"] == "Desktop Application":
@@ -236,24 +258,24 @@ class EditorWindow(QtGui.QWidget):
 
         bookmarkWidget = BookmarkWidget(
             self.editorTabWidget, self.bottomStackSwitcher)
-        self.addBottomWidget(bookmarkWidget,
-                             QtGui.QIcon(os.path.join("Resources", "images", "tag")), "Bookmarks")
+#        self.addBottomWidget(bookmarkWidget,
+#                             QtGui.QIcon(os.path.join("Resources", "images", "tag")), "Bookmarks")
 
         tasksWidget = Tasks(self.editorTabWidget, self.bottomStackSwitcher)
-        self.addBottomWidget(tasksWidget,
-                             QtGui.QIcon(os.path.join("Resources", "images", "issue")), "Tasks")
-
-        self.addBottomWidget(self.messagesWidget,
-                             QtGui.QIcon(os.path.join("Resources", "images", "speech_bubble")), "Messages")
+#        self.addBottomWidget(tasksWidget,
+#                             QtGui.QIcon(os.path.join("Resources", "images", "issue")), "Tasks")
+#
+#        self.addBottomWidget(self.messagesWidget,
+#                             QtGui.QIcon(os.path.join("Resources", "images", "speech_bubble")), "Messages")
 
         self.profiler = Profiler(self.useData, self.bottomStackSwitcher)
-        self.addBottomWidget(self.profiler,
-                             QtGui.QIcon(os.path.join("Resources", "images", "settings")), "Profiler")
+#        self.addBottomWidget(self.profiler,
+#                             QtGui.QIcon(os.path.join("Resources", "images", "settings")), "Profiler")
         self.runWidget.loadProfile.connect(
             self.profiler.viewProfile)
 
-        self.addBottomWidget(self.findInFiles,
-                             QtGui.QIcon(os.path.join("Resources", "images", "attibutes")), "Find-in-Files")
+#        self.addBottomWidget(self.findInFiles,
+#                             QtGui.QIcon(os.path.join("Resources", "images", "attibutes")), "Find-in-Files")
 
         self.bottomStackSwitcher.setDefault()
 
@@ -277,8 +299,8 @@ class EditorWindow(QtGui.QWidget):
             settings.beginGroup(projectPathDict['root'])
             self.hSplitter.restoreState(settings.value('hsplitter'))
             self.vSplitter.restoreState(settings.value('vsplitter'))
-            self.sideSplitter.restoreState(
-                settings.value('sidesplitter'))
+#            self.sideSplitter.restoreState(
+#                settings.value('sidesplitter'))
             self.vSplitter.updateStatus()
             self.writePad.setGeometry(settings.value('writepad'))
             settings.endGroup()
@@ -486,19 +508,6 @@ class EditorWindow(QtGui.QWidget):
         self.standardToolbar.addSeparator()
         self.standardToolbar.addAction(self.editorTabWidget.saveAct)
         self.standardToolbar.addAction(self.editorTabWidget.saveAllAct)
-        self.standardToolbar.addAction(self.editorTabWidget.undoAct)
-        self.editorTabWidget.undoAct.setDisabled(True)
-        self.standardToolbar.addAction(self.editorTabWidget.redoAct)
-        self.editorTabWidget.redoAct.setDisabled(True)
-        self.standardToolbar.addSeparator()
-        self.standardToolbar.addAction(self.editorTabWidget.cutAct)
-        self.editorTabWidget.cutAct.setDisabled(True)
-        self.standardToolbar.addAction(self.editorTabWidget.copyAct)
-        self.editorTabWidget.copyAct.setDisabled(True)
-        self.standardToolbar.addAction(self.editorTabWidget.pasteAct)
-        self.standardToolbar.addSeparator()
-        self.standardToolbar.addAction(self.editorTabWidget.dedentAct)
-        self.standardToolbar.addAction(self.editorTabWidget.indentAct)
 
         self.standardToolbar.addSeparator()
         self.standardToolbar.addAction(self.runFileAct)
@@ -510,16 +519,16 @@ class EditorWindow(QtGui.QWidget):
         self.standardToolbar.addAction(self.finderAct)
         self.standardToolbar.addAction(self.replaceAct)
         self.standardToolbar.addAction(self.findInFilesAct)
-        self.standardToolbar.addSeparator()
-        self.standardToolbar.addAction(self.addToLibraryAct)
-        self.standardToolbar.addAction(self.writePadAct)
-
-        self.bookmarkToolbar.addAction(
-            self.editorTabWidget.findNextBookmarkAct)
-        self.bookmarkToolbar.addAction(
-            self.editorTabWidget.findPrevBookmarkAct)
-        self.bookmarkToolbar.addAction(self.editorTabWidget.removeBookmarksAct)
-        self.standardToolbar.addWidget(self.bookmarkToolbar)
+#        self.standardToolbar.addSeparator()
+#        self.standardToolbar.addAction(self.addToLibraryAct)
+#        self.standardToolbar.addAction(self.writePadAct)
+#
+#        self.bookmarkToolbar.addAction(
+#            self.editorTabWidget.findNextBookmarkAct)
+#        self.bookmarkToolbar.addAction(
+#            self.editorTabWidget.findPrevBookmarkAct)
+#        self.bookmarkToolbar.addAction(self.editorTabWidget.removeBookmarksAct)
+#        self.standardToolbar.addWidget(self.bookmarkToolbar)
 
     def recentFileActivated(self, action):
         path = action.text().split('  ', 1)[1]
@@ -674,7 +683,7 @@ class EditorWindow(QtGui.QWidget):
         settings.beginGroup(name)
         settings.setValue('hsplitter', self.hSplitter.saveState())
         settings.setValue('vsplitter', self.vSplitter.saveState())
-        settings.setValue('sidesplitter', self.sideSplitter.saveState())
+#        settings.setValue('sidesplitter', self.sideSplitter.saveState())
         settings.setValue('writepad', self.writePad.geometry())
         settings.endGroup()
 

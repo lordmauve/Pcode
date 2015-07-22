@@ -228,7 +228,8 @@ class ProjectTree(QtGui.QTreeView):
         self.fileSystemModel.setNameFilterDisables(False)
         self.fileSystemModel.setIconProvider(iconProvider)
         self.setModel(self.fileSystemModel)
-        self.setColumnWidth(0, 300)
+        for i in range(1, 4):
+            self.setColumnHidden(i, True)
 
         self.createActions()
         self.loadShortcut(self.root)
@@ -705,7 +706,7 @@ class ProjectView(QtGui.QWidget):
         self.searchTimer = QtCore.QTimer()
         self.searchTimer.setSingleShot(True)
         self.searchTimer.timeout.connect(self.search)
-        
+
         vbox = QtGui.QVBoxLayout()
         vbox.setSpacing(0)
         mainLayout.addLayout(vbox)
@@ -739,7 +740,7 @@ class ProjectView(QtGui.QWidget):
         self.progressBar.setRange(0, 0)
         vbox.addWidget(self.progressBar)
         self.progressBar.hide()
-        
+
     def startSearchTimer(self):
         self.searchTimer.start(300)
 
