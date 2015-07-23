@@ -212,6 +212,10 @@ globalStyle = """
             padding: 1px;
         }
 
+        QToolBar QAction QIcon {
+            height: 100px;
+        }
+
         QToolBar QToolButton:hover:enabled { /* when selected using mouse or keyboard */
              background-color: white;
         }

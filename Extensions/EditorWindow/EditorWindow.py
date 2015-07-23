@@ -4,7 +4,7 @@ import sys
 import traceback
 import logging
 
-from PyQt4 import QtCore, QtGui, QtXml
+from PyQt4 import QtCore, QtGui, QtXml, Qt
 
 from Extensions.FileExplorer import FileExplorer
 from Extensions.BottomWidgets.FindInFiles import FindInFiles
@@ -52,8 +52,9 @@ class EditorWindow(QtGui.QWidget):
 
         self.standardToolbar = QtGui.QToolBar("Standard")
         self.standardToolbar.setMovable(False)
+        self.standardToolbar.setIconSize(QtCore.QSize(36, 36))
+        self.standardToolbar.setToolButtonStyle(3)
         self.standardToolbar.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
-        self.standardToolbar.setMaximumHeight(26)
         self.standardToolbar.setObjectName("StandardToolBar")
         mainLayout.addWidget(self.standardToolbar)
 
@@ -188,6 +189,10 @@ class EditorWindow(QtGui.QWidget):
         editMenu.addSeparator()
         editMenu.addAction(self.editorTabWidget.dedentAct)
         editMenu.addAction(self.editorTabWidget.indentAct)
+        editMenu.addSeparator()
+        editMenu.addAction(self.finderAct)
+        editMenu.addAction(self.replaceAct)
+        editMenu.addAction(self.findInFilesAct)
 
         self.projectMenu = QtGui.QMenu("Project")
         if projectPathDict["type"] == "Desktop Application":
@@ -495,9 +500,8 @@ class EditorWindow(QtGui.QWidget):
         self.standardToolbar.addWidget(self.editorMenuButton)
         self.standardToolbar.addAction(self.editorTabWidget.openFileAct)
         self.standardToolbar.addAction(self.editorTabWidget.newPythonFileAct)
-        self.standardToolbar.addSeparator()
         self.standardToolbar.addAction(self.editorTabWidget.saveAct)
-        self.standardToolbar.addAction(self.editorTabWidget.saveAllAct)
+        #self.standardToolbar.addAction(self.editorTabWidget.saveAllAct)
 
         self.standardToolbar.addSeparator()
         self.standardToolbar.addAction(self.runFileAct)
@@ -505,10 +509,6 @@ class EditorWindow(QtGui.QWidget):
         self.standardToolbar.addAction(self.stopRunAct)
         self.stopRunAct.setVisible(False)
         self.standardToolbar.addAction(self.runParamAct)
-        self.standardToolbar.addSeparator()
-        self.standardToolbar.addAction(self.finderAct)
-        self.standardToolbar.addAction(self.replaceAct)
-        self.standardToolbar.addAction(self.findInFilesAct)
 #        self.standardToolbar.addSeparator()
 #        self.standardToolbar.addAction(self.addToLibraryAct)
 #        self.standardToolbar.addAction(self.writePadAct)

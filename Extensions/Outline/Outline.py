@@ -6,7 +6,6 @@ from Extensions.Outline.Python import pyclbr
 
 
 class PythonOutlineThread(QtCore.QThread):
-
     updateNavigator = QtCore.pyqtSignal(dict)
 
     def run(self):
@@ -19,7 +18,6 @@ class PythonOutlineThread(QtCore.QThread):
 
 
 class Outline(QtGui.QTreeWidget):
-
     def __init__(self, useData, editorTabWidget, parent=None):
         QtGui.QTreeWidget.__init__(self, parent)
 
@@ -27,8 +25,8 @@ class Outline(QtGui.QTreeWidget):
         self.useData = useData
         self.editorTabWidget = editorTabWidget
 
-        self.setObjectName("sidebarItem")
-        self.setStyleSheet("QTreeView {margin-top: 23px;}")
+        self.setObjectName("outline")
+        #self.setStyleSheet("QTreeView {margin-top: 23px;}")
 
         self.navigatorTimer = QtCore.QTimer()
         self.navigatorTimer.setSingleShot(True)
@@ -46,7 +44,7 @@ class Outline(QtGui.QTreeWidget):
         self.setHeaderHidden(True)
         self.activated.connect(self.navigatorItemActivated)
         self.itemPressed.connect(self.navigatorItemActivated)
-        
+
     def startNavigatorTimer(self):
         self.navigatorTimer.start(500)
 
